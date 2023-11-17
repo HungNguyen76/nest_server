@@ -1,35 +1,41 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Post, Body, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import {Response} from 'express'
+import {Response} from 'express';
+import {MailService, templates} from "../mails/mail.service";
+import {JwtService} from "../jwts/jwt.service";
+
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService, private readonly mail: MailService, private readonly jwt: JwtService) {}
 
-  @Post()
-  async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
-    let serviceRes = await this.usersService.create(createUserDto);;
-    return res.status(200).json(serviceRes)
-  }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
+    @Post()
+    async register(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
+        try {
+            let serRes = await this.usersService.register(createUserDto);
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
+            if (serRes.status) {
+                /* Mail */
+                this.mail.sendMail({
+                    subject: "Register Authentication Email",
+                    to: serRes.data.email,
+                    html: templates.emailConfirm({
+                        confirmLink: `${process.env.HOST}:${process.env.PORT}/api/v1/users/email-authentication/${serRes.data.id}/${this.jwt.createToken(serRes.data, "300000")}`,
+                        language: "vi",
+                        productName: "Nike Store",
+                        productWebUrl: "nikestore.com",
+                        receiverName: `${serRes.data.firstName} ${serRes.data.lastName}`
+                    })
+                })
+                ///console.log("check", check, serRes.data.email)
+            }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
+            return res.status(serRes.status ? 200 : 213).json(serRes);
+        } catch (err) {
+            return res.status(500).json({
+                message: "Server Controller Error!"
+            });
+        }
+    }
 }
