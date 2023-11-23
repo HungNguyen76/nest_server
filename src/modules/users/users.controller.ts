@@ -25,7 +25,7 @@ export class UsersController {
                         language: "vi",
                         productName: "Nike Store",
                         productWebUrl: "nikestore.com",
-                        receiverName: `${serRes.data.firstName} ${serRes.data.lastName}`
+                        receiverName: `Nguyen Minh Hung`
                     })
                 })
                 ///console.log("check", check, serRes.data.email)

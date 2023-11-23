@@ -8,6 +8,9 @@ import { GatewayModule } from './gateway/gateway.module';
 import { ProductsModule } from './modules/products/products.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthenModule } from './modules/authen/authen.module';
+import { ProductOptionsModule } from './modules/product-options/product-options.module';
+import { OptionPicturesModule } from './modules/option-pictures/option-pictures.module';
+import { ReceiptDetailModule } from './modules/receipt-detail/receipt-detail.module';
 @Module({
   imports: [
     ConfigModule.forRoot(), // load env toàn hệ thống
@@ -24,7 +27,11 @@ import { AuthenModule } from './modules/authen/authen.module';
     CategoriesModule,
     GatewayModule,
     ProductsModule, 
-    UsersModule, AuthenModule
+    UsersModule,
+    AuthenModule,
+    ProductOptionsModule,
+    OptionPicturesModule,
+    ReceiptDetailModule
   ],
   controllers: [AppController],
   providers: [AppService],

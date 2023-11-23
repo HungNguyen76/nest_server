@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -8,27 +8,36 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  async create(@Body() createProductDto: CreateProductDto, @Res() res: Response) {
+    try {
+      const [status, message, data] = await this.productsService.create(createProductDto)
+      // @ts-ignore
+      return res.status(status ? 200: 213).json({
+        message,
+        data
+      })
+    } catch (err) {
+      // @ts-ignore
+      return res.status(500).json({
+        message: "Controller error!"
+      })
+    }
   }
-
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  async find(@Res() res: Response) {
+    try {
+      let [status, message, data] = await this.productsService.find();
+      // @ts-ignore
+      return res.status(status ? 200 : 213).json({
+        message,
+        data
+      })
+    }catch(err) {
+      // @ts-ignore
+      return res.status(500).json({
+        message: "Controller error!"
+      })
+    }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(+id, updateProductDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
-  }
 }
